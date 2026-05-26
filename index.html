@@ -1,0 +1,1437 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>无尽冬日采集计算器</title>
+    <style>
+      :root {
+        --bg-0: #202f9a;
+        --bg-1: #3949b6;
+        --panel: rgba(244, 246, 255, 0.95);
+        --panel-strong: #eef1ff;
+        --line: #c8d2fb;
+        --text: #1d2f9a;
+        --muted: #6880da;
+        --accent: #5a67c8;
+        --accent-2: #3f51b5;
+        --accent-soft: rgba(90, 103, 200, 0.12);
+        --success: #39a33a;
+        --warning: #ffad2f;
+        --shadow: 0 16px 36px rgba(20, 33, 106, 0.22);
+        --radius-xl: 28px;
+        --radius-lg: 20px;
+        --radius-md: 14px;
+        --radius-sm: 12px;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html,
+      body {
+        min-height: 100%;
+      }
+
+      body {
+        margin: 0;
+        font-family: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Noto Sans SC", sans-serif;
+        color: var(--text);
+        background:
+          radial-gradient(circle at 12px 20px, rgba(255, 255, 255, 0.95) 0 2px, transparent 2.5px) 0 0/84px 84px,
+          radial-gradient(circle at 42px 64px, rgba(255, 255, 255, 0.55) 0 3px, transparent 3.5px) 0 0/120px 120px,
+          linear-gradient(180deg, #1d2792 0%, #3342ab 50%, #4757bc 100%);
+      }
+
+      .app {
+        width: min(100%, 940px);
+        margin: 0 auto;
+        padding: 18px 14px 28px;
+      }
+
+      .hero {
+        border-radius: 0 0 28px 28px;
+        padding: 12px 0 0;
+      }
+
+      .surface {
+        background: var(--panel);
+        border: 1px solid rgba(171, 185, 255, 0.9);
+        box-shadow: var(--shadow);
+        border-radius: var(--radius-xl);
+        overflow: hidden;
+      }
+
+      .surface-inner {
+        padding: 18px 18px 16px;
+      }
+
+      .topbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        margin-bottom: 12px;
+      }
+
+      .section-title {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-weight: 800;
+        font-size: 16px;
+        letter-spacing: 0;
+      }
+
+      .section-title .dot {
+        width: 18px;
+        height: 18px;
+        border-radius: 6px;
+        background: linear-gradient(180deg, #7080df, #5362c4);
+        position: relative;
+        flex: 0 0 auto;
+      }
+
+      .section-title .dot::before {
+        content: "";
+        position: absolute;
+        inset: 5px;
+        border-radius: 50%;
+        border: 2px solid rgba(255, 255, 255, 0.9);
+      }
+
+      .lang,
+      .lang-button {
+        border: 1px solid rgba(174, 186, 255, 0.95);
+        background: #fff;
+        color: var(--text);
+        border-radius: 14px;
+        padding: 10px 14px;
+        font-weight: 800;
+        min-width: 116px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        box-shadow: 0 8px 20px rgba(52, 66, 169, 0.15);
+      }
+
+      .lang-button {
+        cursor: pointer;
+      }
+
+      .hint {
+        color: var(--muted);
+        font-size: 13px;
+        margin-bottom: 14px;
+        line-height: 1.5;
+      }
+
+      .hero-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px;
+        margin-bottom: 14px;
+      }
+
+      .hero-card {
+        border: 1px solid var(--line);
+        border-radius: 16px;
+        padding: 12px;
+        background: linear-gradient(180deg, rgba(255, 255, 255, 0.7), rgba(237, 240, 255, 0.78));
+      }
+
+      .hero-head {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 10px;
+        font-weight: 800;
+      }
+
+      .hero-icon {
+        width: 34px;
+        height: 34px;
+        border-radius: 50%;
+        border: 2px solid rgba(255, 255, 255, 0.95);
+        background: linear-gradient(180deg, #8aa0ff, #4053b8);
+        box-shadow: inset 0 0 0 2px rgba(82, 98, 211, 0.18);
+        display: grid;
+        place-items: center;
+        overflow: hidden;
+        flex: 0 0 auto;
+      }
+
+      .hero-icon img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+
+      .hero-name {
+        font-size: 15px;
+        line-height: 1.1;
+      }
+
+      .lv-row {
+        display: grid;
+        grid-template-columns: repeat(6, minmax(0, 1fr));
+        gap: 6px;
+      }
+
+      .lv-btn,
+      .tab-btn,
+      .type-btn,
+      .pill {
+        border: 1px solid #c6cff8;
+        background: #fff;
+        color: var(--text);
+        border-radius: 10px;
+        font: inherit;
+        font-weight: 800;
+        padding: 9px 10px;
+        cursor: pointer;
+        transition: transform 0.12s ease, background 0.12s ease, box-shadow 0.12s ease, color 0.12s ease;
+      }
+
+      .lv-btn:hover,
+      .tab-btn:hover,
+      .type-btn:hover,
+      .pill:hover {
+        transform: translateY(-1px);
+      }
+
+      .lv-btn.active,
+      .tab-btn.active,
+      .type-btn.active {
+        background: linear-gradient(180deg, #7281da, #4b5ec0);
+        color: #fff;
+        border-color: transparent;
+        box-shadow: 0 8px 18px rgba(58, 73, 177, 0.28);
+      }
+
+      .pill.active {
+        background: linear-gradient(180deg, #7281da, #4b5ec0);
+        color: #fff;
+        border-color: transparent;
+        box-shadow: 0 8px 18px rgba(58, 73, 177, 0.28);
+      }
+
+      .hero-bonus {
+        margin-top: 8px;
+        height: 26px;
+        border-radius: 6px;
+        background: rgba(112, 163, 168, 0.15);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--success);
+        font-weight: 800;
+        font-size: 13px;
+      }
+
+      .settings {
+        border-top: 1px solid rgba(198, 207, 248, 0.7);
+        padding-top: 14px;
+        display: grid;
+        gap: 14px;
+      }
+
+      .settings-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px 18px;
+      }
+
+      .field label,
+      .mini-field label {
+        display: block;
+        font-size: 13px;
+        font-weight: 800;
+        margin-bottom: 6px;
+      }
+
+      .field small,
+      .mini-field small {
+        display: block;
+        color: var(--muted);
+        font-size: 12px;
+        margin-bottom: 8px;
+        min-height: 16px;
+      }
+
+      .field input {
+        width: 100%;
+        padding: 14px 14px;
+        border-radius: 14px;
+        border: 1px solid #c4cff7;
+        background: #fff;
+        color: var(--text);
+        font: inherit;
+        font-size: 18px;
+        font-weight: 800;
+        outline: none;
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.75);
+      }
+
+      .field input:focus {
+        border-color: #8391e0;
+        box-shadow: 0 0 0 4px rgba(105, 123, 219, 0.15);
+      }
+
+      .input-wrap {
+        position: relative;
+        width: 100%;
+      }
+
+      .input-wrap::after {
+        content: "%";
+        position: absolute;
+        right: 14px;
+        top: 50%;
+        transform: translateY(-50%);
+        font-weight: 800;
+        color: var(--text);
+        pointer-events: none;
+      }
+
+      .input-wrap input {
+        padding-right: 38px;
+      }
+
+      .toggle-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        flex-wrap: wrap;
+      }
+
+      .toggle {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        font-weight: 800;
+        cursor: pointer;
+        user-select: none;
+        padding: 0;
+        border: 0;
+        background: transparent;
+        color: inherit;
+        font: inherit;
+      }
+
+      .check {
+        width: 22px;
+        height: 22px;
+        border-radius: 6px;
+        background: linear-gradient(180deg, #7281da, #4b5ec0);
+        color: #fff;
+        display: grid;
+        place-items: center;
+        font-size: 16px;
+        line-height: 1;
+        box-shadow: 0 8px 18px rgba(58, 73, 177, 0.25);
+      }
+
+      .buff-pill {
+        background: linear-gradient(180deg, #ffbd52, #ff9f19);
+        color: #fff;
+        border: none;
+        border-radius: 14px;
+        font-weight: 900;
+        padding: 10px 16px;
+        min-width: 92px;
+        text-align: center;
+        box-shadow: 0 10px 24px rgba(255, 164, 28, 0.28);
+      }
+
+      .tabs {
+        margin: 16px 0 10px;
+        background: rgba(255, 255, 255, 0.88);
+        border-radius: 18px;
+        padding: 6px;
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 4px;
+        border: 1px solid rgba(189, 200, 248, 0.9);
+      }
+
+      .tab-btn {
+        padding: 13px 10px;
+        border-radius: 14px;
+        border-color: transparent;
+        background: transparent;
+      }
+
+      .status-bar {
+        margin: 10px 0 14px;
+        background: rgba(74, 86, 183, 0.82);
+        color: #e9edff;
+        border-radius: 12px;
+        padding: 13px 16px;
+        font-weight: 800;
+        text-align: center;
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.14);
+      }
+
+      .view {
+        display: none;
+      }
+
+      .view.active {
+        display: block;
+      }
+
+      .panel {
+        background: linear-gradient(180deg, rgba(245, 247, 255, 0.98), rgba(229, 235, 255, 0.9));
+        border: 1px solid rgba(186, 198, 247, 0.9);
+        border-radius: var(--radius-xl);
+        box-shadow: var(--shadow);
+        padding: 18px;
+        margin-bottom: 14px;
+      }
+
+      .panel h2 {
+        margin: 0 0 16px;
+        font-size: 18px;
+      }
+
+      .resource-type-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px;
+      }
+
+      .type-btn {
+        height: 50px;
+        font-size: 15px;
+      }
+
+      .summary {
+        display: grid;
+        grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+        gap: 22px;
+      }
+
+      .metric {
+        margin-bottom: 12px;
+      }
+
+      .metric-label {
+        color: var(--text);
+        font-size: 13px;
+        font-weight: 800;
+        margin-bottom: 8px;
+      }
+
+      .metric-value {
+        font-size: 26px;
+        line-height: 1.1;
+        font-weight: 900;
+        letter-spacing: 0;
+      }
+
+      .metric-value.green {
+        color: var(--success);
+      }
+
+      .meter {
+        margin-top: 8px;
+        width: 100%;
+        height: 20px;
+        border-radius: 8px;
+        background: rgba(90, 103, 200, 0.85);
+        position: relative;
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+        padding: 0 10px;
+        color: #fff;
+        font-size: 12px;
+        font-weight: 800;
+      }
+
+      .summary-right {
+        display: grid;
+        gap: 18px;
+      }
+
+      .summary-card {
+        background: rgba(255, 255, 255, 0.56);
+        border: 1px solid rgba(198, 207, 248, 0.75);
+        border-radius: 18px;
+        padding: 14px;
+      }
+
+      .big-time {
+        font-size: 30px;
+        font-weight: 900;
+      }
+
+      .meta {
+        color: var(--muted);
+        font-size: 12px;
+        font-weight: 700;
+        margin-top: 4px;
+      }
+
+      .detail-table {
+        width: 100%;
+        border-collapse: collapse;
+        overflow: hidden;
+      }
+
+      .detail-table th,
+      .detail-table td {
+        padding: 14px 12px;
+        text-align: center;
+        border-bottom: 1px solid rgba(197, 210, 249, 0.8);
+        font-size: 13px;
+      }
+
+      .detail-table th {
+        background: rgba(191, 216, 255, 0.46);
+        font-size: 12px;
+        color: var(--text);
+      }
+
+      .detail-table tbody tr.active {
+        background: rgba(173, 204, 255, 0.4);
+      }
+
+      .detail-table td:nth-child(1) {
+        font-weight: 800;
+      }
+
+      .detail-table td:nth-child(3) {
+        color: var(--success);
+        font-weight: 800;
+      }
+
+      .detail-table td:nth-child(4) {
+        color: #0a63d8;
+        font-weight: 900;
+      }
+
+      .footer-space {
+        height: 12px;
+      }
+
+      @media (max-width: 820px) {
+        .hero-grid,
+        .settings-grid,
+        .summary,
+        .resource-type-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .lv-row {
+          grid-template-columns: repeat(3, minmax(0, 1fr));
+        }
+
+        .topbar {
+          align-items: flex-start;
+          flex-direction: column;
+        }
+      }
+
+      @media (max-width: 560px) {
+        .app {
+          padding: 10px;
+        }
+
+        .surface-inner,
+        .panel {
+          padding: 14px;
+        }
+
+        .metric-value,
+        .big-time {
+          font-size: 22px;
+        }
+
+        .field input {
+          font-size: 16px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="app">
+      <section class="hero surface">
+        <div class="surface-inner">
+          <div class="topbar">
+            <div class="section-title">
+              <span class="dot"></span>
+              <span id="mainTitle">采集速度加成</span>
+            </div>
+            <button class="lang-button" id="langToggle" type="button"><span id="langLabel">中文</span><span>▾</span></button>
+          </div>
+          <div class="hint" id="mainHint">输入百分比加成，例如输入 20 表示 +20%。每个英雄每级提升 5%，最高 LV5 = 25%。</div>
+
+          <div class="hero-grid" id="heroGrid"></div>
+
+          <div class="settings">
+            <div class="settings-grid">
+              <div class="field">
+                <label id="specialBuffTitle">全局 100% 特别 buff</label>
+                <small id="specialBuffHint">默认开启，关闭后会从总加成里移除 100%</small>
+                <div class="toggle-row">
+                  <button class="toggle" id="specialBuffToggle" type="button" aria-pressed="true">
+                    <span class="check" id="specialCheck">✓</span>
+                    <span id="specialBuffLabel">启用 +100% Buff</span>
+                  </button>
+                  <button class="buff-pill" id="specialBuffBtn" type="button">+100%</button>
+                </div>
+              </div>
+            </div>
+            <div class="hint" id="resourceBonusHint" style="margin: 0;">四种资源的加成分别在下方设置</div>
+
+            <div class="settings-grid" id="resourceBonusGrid"></div>
+          </div>
+        </div>
+      </section>
+
+      <div class="tabs" role="tablist" aria-label="资源页面切换">
+        <button class="tab-btn active" type="button" data-view="resource" id="tabResource">资源采集</button>
+        <button class="tab-btn" type="button" data-view="alliance" id="tabAlliance">联盟采集</button>
+        <button class="tab-btn" type="button" disabled title="后续继续做" id="tabLoad">负重查询</button>
+      </div>
+
+      <div class="status-bar" id="buffBanner">+100% Buff 已启用</div>
+
+      <section class="view active" id="resourceView">
+        <section class="panel">
+          <h2 id="resourceLevelTitle">资源点等级</h2>
+          <div class="lv-row" id="resourceLevelRow"></div>
+        </section>
+
+        <section class="panel">
+          <h2 id="resourceTypeTitle">资源类型</h2>
+          <div class="resource-type-grid" id="resourceTypeGrid"></div>
+        </section>
+
+        <section class="panel">
+          <h2 id="resourceCalcTitle">采集数据</h2>
+          <div class="summary">
+            <div>
+              <div class="metric">
+                <div class="metric-label">基础采集速度</div>
+                <div class="metric-value" id="baseSpeed"></div>
+              </div>
+              <div class="metric">
+                <div class="metric-label">加成速度</div>
+                <div class="metric-value green" id="bonusSpeed"></div>
+                <div class="meter" id="bonusFormula"></div>
+              </div>
+              <div class="metric">
+                <div class="metric-label">实际采集速度</div>
+                <div class="metric-value" id="actualSpeed"></div>
+                <div class="meter" id="actualFormula"></div>
+              </div>
+              <div class="metric">
+                <div class="metric-label">采集时间</div>
+                <div class="metric-value" id="duration"></div>
+              </div>
+            </div>
+
+            <div class="summary-right">
+              <div class="summary-card">
+                <div class="metric-label">资源总量</div>
+                <div class="metric-value" id="resourceTotal"></div>
+                <div class="meta" id="resourceMeta"></div>
+              </div>
+              <div class="summary-card">
+                <div class="metric-label">总加成</div>
+                <div class="metric-value" id="totalBonus"></div>
+                <div class="meta" id="bonusBreakdown"></div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="panel">
+          <h2 id="tableTitle">采集数据 - 生肉</h2>
+          <table class="detail-table">
+            <thead>
+              <tr>
+                <th>资源点等级</th>
+                <th>基础采集速度</th>
+                <th>资源总量</th>
+                <th>加成速度</th>
+                <th>实际采集速度</th>
+                <th>采集时间</th>
+              </tr>
+            </thead>
+            <tbody id="detailBody"></tbody>
+          </table>
+        </section>
+      </section>
+
+      <section class="view" id="allianceView">
+        <section class="panel">
+          <h2 id="allianceResourceTypeTitle">资源类型</h2>
+          <div class="resource-type-grid" id="allianceResourceTypeGrid"></div>
+        </section>
+
+        <section class="panel">
+          <h2 id="allianceTimeTitle">剩余时间</h2>
+          <div class="settings-grid" style="grid-template-columns: repeat(3, minmax(0, 1fr));">
+            <div class="field">
+              <input id="allianceHours" type="number" min="0" step="1" />
+              <small class="time-unit" style="margin-top: 8px; margin-bottom: 0; text-align: center;">小时</small>
+            </div>
+            <div class="field">
+              <input id="allianceMinutes" type="number" min="0" max="59" step="1" />
+              <small class="time-unit" style="margin-top: 8px; margin-bottom: 0; text-align: center;">分钟</small>
+            </div>
+            <div class="field">
+              <input id="allianceSeconds" type="number" min="0" max="59" step="1" />
+              <small class="time-unit" style="margin-top: 8px; margin-bottom: 0; text-align: center;">秒</small>
+            </div>
+          </div>
+          <div class="hint" id="allianceTimeHint" style="margin: 10px 0 0;">默认 12 小时，按剩余时间反推这段时间内能采到多少资源。</div>
+        </section>
+
+        <section class="panel">
+          <h2 id="troopTitle">选择兵力等级</h2>
+          <div class="lv-row" id="troopLevelRow" style="grid-template-columns: repeat(10, minmax(0, 1fr));"></div>
+        </section>
+
+        <section class="panel">
+          <h2 id="allianceCalcTitle">联盟资源采集计算</h2>
+          <div class="summary">
+            <div>
+              <div class="metric">
+                <div class="metric-label">基础采集速度</div>
+                <div class="metric-value" id="allianceBaseSpeed"></div>
+              </div>
+              <div class="metric">
+                <div class="metric-label">加成速度</div>
+                <div class="metric-value green" id="allianceBonusSpeed"></div>
+                <div class="meter" id="allianceBonusFormula"></div>
+              </div>
+              <div class="metric">
+                <div class="metric-label">实际采集速度</div>
+                <div class="metric-value" id="allianceActualSpeed"></div>
+                <div class="meter" id="allianceActualFormula"></div>
+              </div>
+              <div class="metric">
+                <div class="metric-label">预计采集量</div>
+                <div class="metric-value" id="allianceYield"></div>
+              </div>
+            </div>
+
+            <div class="summary-right">
+              <div class="summary-card">
+                <div class="metric-label">负重上限</div>
+                <div class="metric-value" id="allianceLoad"></div>
+                <div class="meta" id="allianceResourceMeta"></div>
+              </div>
+              <div class="summary-card">
+                <div class="metric-label">所需兵力</div>
+                <div class="metric-value" id="allianceTroops"></div>
+                <div class="meta" id="allianceBonusBreakdown"></div>
+              </div>
+            </div>
+          </div>
+        </section>
+      </section>
+
+      <div class="footer-space"></div>
+    </main>
+
+    <script>
+      const RESOURCE_DATA = {
+        meat: {
+          labelZh: "生肉",
+          labelEn: "Meat",
+          heroKey: "clawris",
+          base: [316800, 332640, 348480, 364320, 380160, 396000, 411840, 427680],
+          totals: [70000, 150000, 300000, 600000, 1200000, 3000000, 6000000, 14000000],
+        },
+        wood: {
+          labelZh: "木材",
+          labelEn: "Wood",
+          heroKey: "eugene",
+          base: [316800, 332640, 348480, 364320, 380160, 396000, 411840, 427680],
+          totals: [70000, 150000, 300000, 600000, 1200000, 3000000, 6000000, 14000000],
+        },
+        coal: {
+          labelZh: "煤矿",
+          labelEn: "Coal",
+          heroKey: "charlie",
+          base: [63360, 66528, 69696, 72864, 76032, 79200, 82368, 85536],
+          totals: [14000, 30000, 60000, 120000, 240000, 600000, 1200000, 2800000],
+        },
+        iron: {
+          labelZh: "铁矿",
+          labelEn: "Iron",
+          heroKey: "smith",
+          base: [15840, 16632, 17424, 18216, 19008, 19800, 20592, 21384],
+          totals: [3500, 7500, 15000, 30000, 60000, 150000, 300000, 700000],
+        },
+      };
+
+      const HEROES = [
+        { key: "clawris", nameZh: "克劳瑞斯", nameEn: "Cloris", avatar: "https://gom-s3-user-avatar.s3.us-west-2.amazonaws.com/wp-content/uploads/2023/05/cloris.png" },
+        { key: "eugene", nameZh: "尤金", nameEn: "Eugene", avatar: "https://gom-s3-user-avatar.s3.us-west-2.amazonaws.com/wp-content/uploads/2023/05/eugene.png" },
+        { key: "charlie", nameZh: "查理", nameEn: "Charlie", avatar: "https://gom-s3-user-avatar.s3.us-west-2.amazonaws.com/wp-content/uploads/2023/05/charlie.png" },
+        { key: "smith", nameZh: "史密斯", nameEn: "Smith", avatar: "https://gom-s3-user-avatar.s3.us-west-2.amazonaws.com/wp-content/uploads/2023/05/smith.png" },
+      ];
+
+      const HERO_LEVEL_BONUS = [0, 5, 10, 15, 20, 25];
+      const RESOURCE_KEYS = ["meat", "wood", "coal", "iron"];
+      const TROOP_LOADS = [108, 124, 142, 164, 188, 217, 249, 287, 330, 379];
+      const ALLIANCE_BASE_SPEEDS = {
+        meat: 436230,
+        wood: 436230,
+        coal: 87246,
+        iron: 21811.5,
+      };
+      const ALLIANCE_WEIGHT_FACTORS = {
+        meat: 1,
+        wood: 1,
+        coal: 5,
+        iron: 20,
+      };
+
+      const I18N = {
+        zh: {
+          lang: "中文",
+          mainTitle: "采集速度加成",
+          mainHint: "输入百分比加成，例如输入 20 表示 +20%。每个英雄每级提升 5%，最高 LV5 = 25%。",
+          specialBuffTitle: "全局 100% 特别 buff",
+          specialBuffHint: "默认开启，关闭后会从总加成里移除 100%",
+          specialBuffLabel: "启用 +100% Buff",
+          resourceBonusHint: "四种资源的加成分别在下方设置",
+          tabResource: "资源采集",
+          tabAlliance: "联盟采集",
+          tabLoad: "负重查询",
+          resourceLevelTitle: "资源点等级",
+          resourceTypeTitle: "资源类型",
+          resourceCalcTitle: "采集数据",
+          allianceResourceTypeTitle: "资源类型",
+          allianceTimeTitle: "剩余时间",
+          allianceTimeHint: "默认 12 小时，按剩余时间反推这段时间内能采到多少资源。",
+          troopTitle: "选择兵力等级",
+          allianceCalcTitle: "联盟资源采集计算",
+          hourUnit: "小时",
+          minuteUnit: "分钟",
+          secondUnit: "秒",
+          resourceTotal: "资源总量",
+          totalBonus: "总加成",
+          baseSpeed: "基础采集速度",
+          bonusSpeed: "加成速度",
+          actualSpeed: "实际采集速度",
+          duration: "采集时间",
+          levelCol: "资源点等级",
+          totalCol: "资源总量",
+          yieldCol: "预计采集量",
+          loadCol: "负重上限",
+          troopsCol: "所需兵力",
+          allianceCurrentResource: "当前资源点",
+          allianceRemaining: "剩余时间",
+          allianceBaseNote: "按 9 级换算",
+          totalBonusBreakdown: "总加成",
+          weightFactor: "重量系数",
+          troopLevel: "兵力等级",
+          allianceLoadUnit: "kg",
+          allianceTroopsUnit: "个",
+          currentResource: "当前资源点",
+          allianceRateSuffix: "按 9 级换算",
+          allianceLabelTotal: "总加成",
+        },
+        en: {
+          lang: "EN",
+          mainTitle: "Gathering Speed Boost",
+          mainHint: "Enter a percentage bonus, for example 20 means +20%. Each hero level adds 5%, up to LV5 = 25%.",
+          specialBuffTitle: "Global 100% special buff",
+          specialBuffHint: "Enabled by default; turning it off removes 100% from the total bonus.",
+          specialBuffLabel: "Enable +100% buff",
+          resourceBonusHint: "Set each resource bonus below.",
+          tabResource: "Resource",
+          tabAlliance: "Alliance",
+          tabLoad: "Load Check",
+          resourceLevelTitle: "Resource Node Level",
+          resourceTypeTitle: "Resource Type",
+          resourceCalcTitle: "Gathering Data",
+          allianceResourceTypeTitle: "Resource Type",
+          allianceTimeTitle: "Remaining Time",
+          allianceTimeHint: "Default is 12 hours. We estimate how much can be gathered during the remaining time.",
+          troopTitle: "Choose Troop Tier",
+          allianceCalcTitle: "Alliance Gathering Calculator",
+          hourUnit: "h",
+          minuteUnit: "m",
+          secondUnit: "s",
+          resourceTotal: "Total Resource",
+          totalBonus: "Total Bonus",
+          baseSpeed: "Base Speed",
+          bonusSpeed: "Bonus Speed",
+          actualSpeed: "Actual Speed",
+          duration: "Gather Time",
+          levelCol: "Node Level",
+          totalCol: "Total Resource",
+          yieldCol: "Estimated Yield",
+          loadCol: "Load Cap",
+          troopsCol: "Troops Needed",
+          allianceCurrentResource: "Current Node",
+          allianceRemaining: "Remaining Time",
+          allianceBaseNote: "Converted from level 9",
+          totalBonusBreakdown: "Total Bonus",
+          weightFactor: "Weight Factor",
+          troopLevel: "Troop Tier",
+          allianceLoadUnit: "kg",
+          allianceTroopsUnit: "troops",
+          currentResource: "Current Node",
+          allianceRateSuffix: "Converted from level 9",
+          allianceLabelTotal: "Total Bonus",
+        },
+      };
+
+      const LANGUAGE = {
+        zh: {
+          resource: "资源采集",
+          alliance: "联盟采集",
+          load: "负重查询",
+        },
+        en: {
+          resource: "Resource",
+          alliance: "Alliance",
+          load: "Load Check",
+        },
+      };
+
+      const state = loadState();
+
+      const heroGrid = document.getElementById("heroGrid");
+      const resourceBonusGrid = document.getElementById("resourceBonusGrid");
+      const resourceLevelRow = document.getElementById("resourceLevelRow");
+      const resourceTypeGrid = document.getElementById("resourceTypeGrid");
+      const detailBody = document.getElementById("detailBody");
+
+      const el = {
+        langToggle: document.getElementById("langToggle"),
+        langLabel: document.getElementById("langLabel"),
+        mainTitle: document.getElementById("mainTitle"),
+        mainHint: document.getElementById("mainHint"),
+        specialBuffTitle: document.getElementById("specialBuffTitle"),
+        specialBuffHint: document.getElementById("specialBuffHint"),
+        specialBuffLabel: document.getElementById("specialBuffLabel"),
+        resourceBonusHint: document.getElementById("resourceBonusHint"),
+        tabs: Array.from(document.querySelectorAll(".tab-btn[data-view]")),
+        tabResource: document.getElementById("tabResource"),
+        tabAlliance: document.getElementById("tabAlliance"),
+        tabLoad: document.getElementById("tabLoad"),
+        specialCheck: document.getElementById("specialCheck"),
+        specialBuffToggle: document.getElementById("specialBuffToggle"),
+        specialBuffBtn: document.getElementById("specialBuffBtn"),
+        buffBanner: document.getElementById("buffBanner"),
+        resourceLevelTitle: document.getElementById("resourceLevelTitle"),
+        resourceTypeTitle: document.getElementById("resourceTypeTitle"),
+        resourceCalcTitle: document.getElementById("resourceCalcTitle"),
+        baseSpeed: document.getElementById("baseSpeed"),
+        bonusSpeed: document.getElementById("bonusSpeed"),
+        actualSpeed: document.getElementById("actualSpeed"),
+        duration: document.getElementById("duration"),
+        resourceTotal: document.getElementById("resourceTotal"),
+        totalBonus: document.getElementById("totalBonus"),
+        bonusFormula: document.getElementById("bonusFormula"),
+        actualFormula: document.getElementById("actualFormula"),
+        resourceMeta: document.getElementById("resourceMeta"),
+        bonusBreakdown: document.getElementById("bonusBreakdown"),
+        tableTitle: document.getElementById("tableTitle"),
+        resourceView: document.getElementById("resourceView"),
+        allianceView: document.getElementById("allianceView"),
+        allianceResourceTypeTitle: document.getElementById("allianceResourceTypeTitle"),
+        allianceTimeTitle: document.getElementById("allianceTimeTitle"),
+        allianceTimeHint: document.getElementById("allianceTimeHint"),
+        troopTitle: document.getElementById("troopTitle"),
+        allianceCalcTitle: document.getElementById("allianceCalcTitle"),
+        allianceResourceTypeGrid: document.getElementById("allianceResourceTypeGrid"),
+        allianceHours: document.getElementById("allianceHours"),
+        allianceMinutes: document.getElementById("allianceMinutes"),
+        allianceSeconds: document.getElementById("allianceSeconds"),
+        troopLevelRow: document.getElementById("troopLevelRow"),
+        allianceBaseSpeed: document.getElementById("allianceBaseSpeed"),
+        allianceBonusSpeed: document.getElementById("allianceBonusSpeed"),
+        allianceActualSpeed: document.getElementById("allianceActualSpeed"),
+        allianceYield: document.getElementById("allianceYield"),
+        allianceLoad: document.getElementById("allianceLoad"),
+        allianceTroops: document.getElementById("allianceTroops"),
+        allianceBonusFormula: document.getElementById("allianceBonusFormula"),
+        allianceActualFormula: document.getElementById("allianceActualFormula"),
+        allianceResourceMeta: document.getElementById("allianceResourceMeta"),
+        allianceBonusBreakdown: document.getElementById("allianceBonusBreakdown"),
+      };
+
+      function loadState() {
+        try {
+          const raw = window.localStorage.getItem("winter-calc-state");
+          if (!raw) throw new Error("empty");
+          const parsed = JSON.parse(raw);
+          return {
+            selectedResource: parsed.selectedResource || "meat",
+            selectedAllianceResource: parsed.selectedAllianceResource || parsed.selectedResource || "meat",
+            levels: { clawris: 5, eugene: 4, charlie: 4, smith: 4, ...(parsed.levels || {}) },
+            resourceBonuses: {
+              meat: 249.5,
+              wood: 233.5,
+              coal: 249,
+              iron: 249,
+              ...(parsed.resourceBonuses || {}),
+            },
+            specialBuff: parsed.specialBuff !== false,
+            allianceTimeHours: Number.isFinite(parsed.allianceTimeHours) ? parsed.allianceTimeHours : 12,
+            allianceTimeMinutes: Number.isFinite(parsed.allianceTimeMinutes) ? parsed.allianceTimeMinutes : 0,
+            allianceTimeSeconds: Number.isFinite(parsed.allianceTimeSeconds) ? parsed.allianceTimeSeconds : 0,
+            troopTier: Number.isFinite(parsed.troopTier) ? parsed.troopTier : 10,
+            activeView: parsed.activeView || "alliance",
+            language: parsed.language === "en" ? "en" : "zh",
+          };
+        } catch {
+          return {
+            selectedResource: "meat",
+            selectedAllianceResource: "meat",
+            levels: { clawris: 5, eugene: 4, charlie: 4, smith: 4 },
+            resourceBonuses: { meat: 249.5, wood: 233.5, coal: 249, iron: 249 },
+            specialBuff: true,
+            allianceTimeHours: 12,
+            allianceTimeMinutes: 0,
+            allianceTimeSeconds: 0,
+            troopTier: 10,
+            activeView: "alliance",
+            language: "zh",
+          };
+        }
+      }
+
+      function saveState() {
+        try {
+          window.localStorage.setItem("winter-calc-state", JSON.stringify(state));
+        } catch {
+          // Some file:// browsers block persistence; keep the UI working without storage.
+        }
+      }
+
+      function currentLang() {
+        return state.language === "en" ? "en" : "zh";
+      }
+
+      function t(key) {
+        return I18N[currentLang()][key] ?? I18N.zh[key] ?? key;
+      }
+
+      function getResourceLabel(key) {
+        const resource = RESOURCE_DATA[key] || RESOURCE_DATA.meat;
+        return currentLang() === "en" ? resource.labelEn : resource.labelZh;
+      }
+
+      function getHeroName(hero) {
+        return currentLang() === "en" ? hero.nameEn : hero.nameZh;
+      }
+
+      function formatNumber(value, decimals = 1) {
+        if (!Number.isFinite(value)) return "-";
+        const rounded = Math.abs(value) >= 1000 && Number.isInteger(value) ? value : Number(value.toFixed(decimals));
+        return new Intl.NumberFormat(currentLang() === "en" ? "en-US" : "zh-CN", {
+          minimumFractionDigits: decimals > 0 && !Number.isInteger(rounded) ? decimals : 0,
+          maximumFractionDigits: decimals,
+        }).format(rounded);
+      }
+
+      function formatSpeed(value) {
+        const decimals = Math.abs(value) >= 100000 ? 1 : 2;
+        return `${formatNumber(value, decimals)}/h`;
+      }
+
+      function formatDuration(hours) {
+        const totalSeconds = Math.max(0, Math.round(hours * 3600));
+        const h = Math.floor(totalSeconds / 3600);
+        const m = Math.floor((totalSeconds % 3600) / 60);
+        const s = totalSeconds % 60;
+        if (currentLang() === "en") {
+          const pieces = [];
+          if (h) pieces.push(`${h}h`);
+          if (m || h) pieces.push(`${m}m`);
+          pieces.push(`${s}s`);
+          return pieces.join(" ");
+        }
+        const pieces = [];
+        if (h) pieces.push(`${h}小时`);
+        if (m || h) pieces.push(`${m}分钟`);
+        pieces.push(`${s}秒`);
+        return pieces.join("");
+      }
+
+      function getHeroBonus(heroKey) {
+        const level = state.levels[heroKey] || 0;
+        return HERO_LEVEL_BONUS[level] || 0;
+      }
+
+      function getSelectedResource() {
+        return RESOURCE_DATA[state.selectedResource] || RESOURCE_DATA.meat;
+      }
+
+      function calculate(resourceKey) {
+        const resource = RESOURCE_DATA[resourceKey];
+        const levelIndex = Math.min(Math.max((state.selectedLevel || 8) - 1, 0), 7);
+        const baseSpeed = resource.base[levelIndex];
+        const totalResource = resource.totals[levelIndex];
+        const heroBonus = getHeroBonus(resource.heroKey);
+        const resourceBonus = Number(state.resourceBonuses[resourceKey] ?? 0);
+        const specialBuff = state.specialBuff ? 100 : 0;
+        const totalBonus = heroBonus + resourceBonus + specialBuff;
+        const bonusSpeed = baseSpeed * (totalBonus / 100);
+        const actualSpeed = baseSpeed + bonusSpeed;
+        const hours = totalResource / actualSpeed;
+        return { baseSpeed, totalResource, heroBonus, resourceBonus, specialBuff, totalBonus, bonusSpeed, actualSpeed, hours };
+      }
+
+      function getAllianceSeconds() {
+        const hours = Math.max(0, Number(state.allianceTimeHours) || 0);
+        const minutes = Math.max(0, Math.min(59, Number(state.allianceTimeMinutes) || 0));
+        const seconds = Math.max(0, Math.min(59, Number(state.allianceTimeSeconds) || 0));
+        return hours * 3600 + minutes * 60 + seconds;
+      }
+
+      function calculateAlliance(resourceKey) {
+        const resource = RESOURCE_DATA[resourceKey];
+        const baseSpeed = ALLIANCE_BASE_SPEEDS[resourceKey] || ALLIANCE_BASE_SPEEDS.meat;
+        const heroBonus = getHeroBonus(resource.heroKey);
+        const resourceBonus = Number(state.resourceBonuses[resourceKey] ?? 0);
+        const specialBuff = state.specialBuff ? 100 : 0;
+        const totalBonus = heroBonus + resourceBonus + specialBuff;
+        const bonusSpeed = baseSpeed * (totalBonus / 100);
+        const actualSpeed = baseSpeed + bonusSpeed;
+        const remainingSeconds = getAllianceSeconds();
+        const estimatedYield = actualSpeed * (remainingSeconds / 3600);
+        const weightFactor = ALLIANCE_WEIGHT_FACTORS[resourceKey] || 1;
+        const weightedLoad = estimatedYield * weightFactor;
+        const loadPerTroop = TROOP_LOADS[Math.min(Math.max((state.troopTier || 10) - 1, 0), 9)];
+        const troopsNeeded = loadPerTroop ? Math.ceil(weightedLoad / loadPerTroop) : 0;
+        return {
+          baseSpeed,
+          heroBonus,
+          resourceBonus,
+          specialBuff,
+          totalBonus,
+          bonusSpeed,
+          actualSpeed,
+          estimatedYield,
+          weightedLoad,
+          weightFactor,
+          loadPerTroop,
+          troopsNeeded,
+          remainingSeconds,
+        };
+      }
+
+      function renderHeroes() {
+        heroGrid.innerHTML = HEROES.map((hero) => {
+          const level = state.levels[hero.key] ?? 0;
+          const bonus = HERO_LEVEL_BONUS[level];
+          return `
+            <article class="hero-card">
+              <div class="hero-head">
+                <div class="hero-icon" aria-hidden="true"><img src="${hero.avatar}" alt="${getHeroName(hero)}"></div>
+                <div class="hero-name">${getHeroName(hero)}</div>
+              </div>
+              <div class="lv-row" data-hero="${hero.key}">
+                ${HERO_LEVEL_BONUS.map((_, idx) => `<button class="lv-btn ${idx === level ? "active" : ""}" type="button" data-level="${idx}">LV${idx}</button>`).join("")}
+              </div>
+              <div class="hero-bonus">+${bonus}%</div>
+            </article>
+          `;
+        }).join("");
+
+        heroGrid.querySelectorAll(".lv-row").forEach((row) => {
+          const heroKey = row.dataset.hero;
+          row.querySelectorAll(".lv-btn").forEach((btn) => {
+            btn.addEventListener("click", () => {
+              state.levels[heroKey] = Number(btn.dataset.level);
+              saveState();
+              render();
+            });
+          });
+        });
+      }
+
+      function renderResourceSettings() {
+        el.specialCheck.textContent = state.specialBuff ? "✓" : "";
+        el.specialBuffToggle.setAttribute("aria-pressed", state.specialBuff ? "true" : "false");
+        el.buffBanner.textContent = state.specialBuff ? (currentLang() === "en" ? "+100% buff enabled" : "+100% Buff 已启用") : (currentLang() === "en" ? "+100% buff disabled" : "+100% Buff 已关闭");
+        el.specialBuffBtn.textContent = state.specialBuff ? "+100%" : (currentLang() === "en" ? "Off" : "关闭");
+
+        resourceBonusGrid.innerHTML = RESOURCE_KEYS.map((key) => {
+          const data = RESOURCE_DATA[key];
+          const hero = HEROES.find((item) => item.key === data.heroKey);
+          return `
+            <div class="field">
+              <label for="bonus-${key}">${getResourceLabel(key)}</label>
+              <small>(${getHeroName(hero)} LV${state.levels[data.heroKey]} +${getHeroBonus(data.heroKey)}%)</small>
+              <div class="input-wrap">
+                <input id="bonus-${key}" type="number" step="0.1" min="0" value="${state.resourceBonuses[key]}" />
+              </div>
+            </div>
+          `;
+        }).join("");
+
+        resourceBonusGrid.querySelectorAll("input").forEach((input) => {
+          input.addEventListener("input", () => {
+            const key = input.id.replace("bonus-", "");
+            state.resourceBonuses[key] = Number(input.value || 0);
+            saveState();
+            render();
+          });
+        });
+      }
+
+      function renderResourceLevels() {
+        resourceLevelRow.innerHTML = Array.from({ length: 8 }, (_, idx) => {
+          const level = idx + 1;
+          const active = level === state.selectedLevel;
+          return `<button class="pill ${active ? "active" : ""}" type="button" data-level="${level}">${currentLang() === "en" ? `Lv ${level}` : `${level}级`}</button>`;
+        }).join("");
+
+        resourceLevelRow.querySelectorAll("[data-level]").forEach((btn) => {
+          btn.addEventListener("click", () => {
+            state.selectedLevel = Number(btn.dataset.level);
+            saveState();
+            render();
+          });
+        });
+      }
+
+      function renderResourceTypes() {
+        resourceTypeGrid.innerHTML = RESOURCE_KEYS.map((key) => {
+          const active = state.selectedResource === key;
+          return `<button class="type-btn ${active ? "active" : ""}" type="button" data-resource="${key}">${getResourceLabel(key)}</button>`;
+        }).join("");
+
+        resourceTypeGrid.querySelectorAll("[data-resource]").forEach((btn) => {
+          btn.addEventListener("click", () => {
+            state.selectedResource = btn.dataset.resource;
+            saveState();
+            render();
+          });
+        });
+      }
+
+      function renderAllianceResourceTypes() {
+        el.allianceResourceTypeGrid.innerHTML = RESOURCE_KEYS.map((key) => {
+          const active = state.selectedAllianceResource === key;
+          return `<button class="type-btn ${active ? "active" : ""}" type="button" data-alliance-resource="${key}">${getResourceLabel(key)}</button>`;
+        }).join("");
+
+        el.allianceResourceTypeGrid.querySelectorAll("[data-alliance-resource]").forEach((btn) => {
+          btn.addEventListener("click", () => {
+            state.selectedAllianceResource = btn.dataset.allianceResource;
+            saveState();
+            render();
+          });
+        });
+      }
+
+      function renderTroopLevels() {
+        el.troopLevelRow.innerHTML = TROOP_LOADS.map((load, index) => {
+          const tier = index + 1;
+          const active = tier === state.troopTier;
+          return `<button class="pill ${active ? "active" : ""}" type="button" data-tier="${tier}">T${tier}</button>`;
+        }).join("");
+
+        el.troopLevelRow.querySelectorAll("[data-tier]").forEach((btn) => {
+          btn.addEventListener("click", () => {
+            state.troopTier = Number(btn.dataset.tier);
+            saveState();
+            render();
+          });
+        });
+      }
+
+      function renderTabs() {
+        el.tabs.forEach((btn) => {
+          const active = btn.dataset.view === state.activeView;
+          btn.classList.toggle("active", active);
+        });
+        el.resourceView.classList.toggle("active", state.activeView === "resource");
+        el.allianceView.classList.toggle("active", state.activeView === "alliance");
+      }
+
+      function applyLanguage() {
+        document.documentElement.lang = currentLang() === "en" ? "en" : "zh-CN";
+        el.langLabel.textContent = t("lang");
+        el.mainTitle.textContent = t("mainTitle");
+        el.mainHint.textContent = t("mainHint");
+        el.specialBuffTitle.textContent = t("specialBuffTitle");
+        el.specialBuffHint.textContent = t("specialBuffHint");
+        el.specialBuffLabel.textContent = t("specialBuffLabel");
+        el.resourceBonusHint.textContent = t("resourceBonusHint");
+        el.tabResource.textContent = t("tabResource");
+        el.tabAlliance.textContent = t("tabAlliance");
+        el.tabLoad.textContent = t("tabLoad");
+        el.tabLoad.title = currentLang() === "en" ? "Coming soon" : "后续继续做";
+        el.resourceLevelTitle.textContent = t("resourceLevelTitle");
+        el.resourceTypeTitle.textContent = t("resourceTypeTitle");
+        el.resourceCalcTitle.textContent = t("resourceCalcTitle");
+        el.allianceResourceTypeTitle.textContent = t("allianceResourceTypeTitle");
+        el.allianceTimeTitle.textContent = t("allianceTimeTitle");
+        el.allianceTimeHint.textContent = t("allianceTimeHint");
+        el.troopTitle.textContent = t("troopTitle");
+        el.allianceCalcTitle.textContent = t("allianceCalcTitle");
+        document.querySelectorAll(".time-unit").forEach((node, index) => {
+          node.textContent = [t("hourUnit"), t("minuteUnit"), t("secondUnit")][index] || node.textContent;
+        });
+        document.querySelectorAll("#resourceView .metric-label").forEach((node, index) => {
+          node.textContent = [t("baseSpeed"), t("bonusSpeed"), t("actualSpeed"), t("duration")][index] || node.textContent;
+        });
+        document.querySelectorAll("#resourceView .summary-card .metric-label").forEach((node, index) => {
+          node.textContent = [t("resourceTotal"), t("totalBonus")][index] || node.textContent;
+        });
+        document.querySelectorAll("#resourceView thead th").forEach((node, index) => {
+          node.textContent = [t("levelCol"), t("baseSpeed"), t("totalCol"), t("bonusSpeed"), t("actualSpeed"), t("duration")][index] || node.textContent;
+        });
+        document.querySelectorAll("#allianceView .metric-label").forEach((node, index) => {
+          node.textContent = [t("baseSpeed"), t("bonusSpeed"), t("actualSpeed"), t("yieldCol")][index] || node.textContent;
+        });
+        document.querySelectorAll("#allianceView .summary-card .metric-label").forEach((node, index) => {
+          node.textContent = [t("loadCol"), t("troopsCol")][index] || node.textContent;
+        });
+      }
+
+      function renderSummary() {
+        const resource = getSelectedResource();
+        const result = calculate(state.selectedResource);
+        const resourceBonus = Number(state.resourceBonuses[state.selectedResource] || 0);
+        const heroBonus = getHeroBonus(resource.heroKey);
+        const specialBuff = state.specialBuff ? 100 : 0;
+        const totalBonus = heroBonus + resourceBonus + specialBuff;
+
+        el.baseSpeed.textContent = formatSpeed(result.baseSpeed);
+        el.bonusSpeed.textContent = `+${formatSpeed(result.bonusSpeed)}`;
+        el.actualSpeed.textContent = formatSpeed(result.actualSpeed);
+        el.duration.textContent = formatDuration(result.hours);
+        el.resourceTotal.textContent = formatNumber(result.totalResource, 0);
+        el.totalBonus.textContent = `+${formatNumber(totalBonus, 1)}%`;
+
+        const breakdownParts = [
+          `LV${state.levels[resource.heroKey]} +${heroBonus}%`,
+          `+${resourceBonus}%`,
+          state.specialBuff ? "+100%" : null,
+        ].filter(Boolean);
+        el.bonusBreakdown.textContent = breakdownParts.join(" + ");
+        el.resourceMeta.textContent = `${t("currentResource")}: ${getResourceLabel(state.selectedResource)}`;
+        el.bonusFormula.textContent = `LV${state.levels[resource.heroKey]} +${heroBonus}% +${resourceBonus}%${state.specialBuff ? " +100%" : ""}`;
+        el.actualFormula.textContent = `+${resourceBonus}%${state.specialBuff ? " +100%" : ""}`;
+        el.buffBanner.textContent = state.specialBuff ? (currentLang() === "en" ? "+100% buff enabled" : "+100% Buff 已启用") : (currentLang() === "en" ? "+100% buff disabled" : "+100% Buff 已关闭");
+        el.specialCheck.textContent = state.specialBuff ? "✓" : "";
+        el.specialBuffBtn.textContent = state.specialBuff ? "+100%" : (currentLang() === "en" ? "Off" : "关闭");
+        el.tableTitle.textContent = `${t("resourceCalcTitle")} - ${getResourceLabel(state.selectedResource)}`;
+
+        detailBody.innerHTML = resource.base
+          .map((baseSpeed, index) => {
+            const level = index + 1;
+            const levelTotal = resource.totals[index];
+            const rowBonus = baseSpeed * (totalBonus / 100);
+            const actualSpeed = baseSpeed + rowBonus;
+            const rowHours = levelTotal / actualSpeed;
+            return `
+              <tr class="${level === state.selectedLevel ? "active" : ""}">
+                <td>${currentLang() === "en" ? `Lv ${level}` : `${level}级`}</td>
+                <td>${formatSpeed(baseSpeed)}</td>
+                <td>${formatNumber(levelTotal, 0)}</td>
+                <td>+${formatSpeed(rowBonus)}</td>
+                <td>${formatSpeed(actualSpeed)}</td>
+                <td>${formatDuration(rowHours)}</td>
+              </tr>
+            `;
+          })
+          .join("");
+      }
+
+      function renderAllianceSummary() {
+        const resource = RESOURCE_DATA[state.selectedAllianceResource] || RESOURCE_DATA.meat;
+        const result = calculateAlliance(state.selectedAllianceResource);
+        const resourceBonus = Number(state.resourceBonuses[state.selectedAllianceResource] || 0);
+        const heroBonus = getHeroBonus(resource.heroKey);
+        const specialBuff = state.specialBuff ? 100 : 0;
+        const totalBonus = heroBonus + resourceBonus + specialBuff;
+        const remainingHours = getAllianceSeconds() / 3600;
+
+        el.allianceBaseSpeed.textContent = formatSpeed(result.baseSpeed);
+        el.allianceBonusSpeed.textContent = `+${formatSpeed(result.bonusSpeed)}`;
+        el.allianceActualSpeed.textContent = formatSpeed(result.actualSpeed);
+        el.allianceYield.textContent = formatNumber(result.estimatedYield, 0);
+        el.allianceLoad.textContent = `${formatNumber(result.loadPerTroop, 0)} ${t("allianceLoadUnit")}`;
+        el.allianceTroops.textContent = `${formatNumber(result.troopsNeeded, 0)} ${t("allianceTroopsUnit")}`;
+        el.allianceBonusFormula.textContent = `LV${state.levels[resource.heroKey]} +${heroBonus}% +${resourceBonus}%${state.specialBuff ? " +100%" : ""}`;
+        el.allianceActualFormula.textContent = `+${resourceBonus}%${state.specialBuff ? " +100%" : ""}`;
+        el.allianceResourceMeta.textContent = `${t("currentResource")}: ${getResourceLabel(state.selectedAllianceResource)} · ${t("allianceRateSuffix")} · ${t("allianceRemaining")}: ${formatDuration(remainingHours)}`;
+        el.allianceBonusBreakdown.textContent = `${t("allianceLabelTotal")}: +${formatNumber(totalBonus, 1)}% · ${t("weightFactor")}: x${result.weightFactor} · ${t("troopLevel")}: T${state.troopTier}`;
+      }
+
+      function bindControls() {
+        el.langToggle.addEventListener("click", () => {
+          state.language = currentLang() === "en" ? "zh" : "en";
+          saveState();
+          render();
+        });
+
+        el.tabs.forEach((btn) => {
+          btn.addEventListener("click", () => {
+            if (!btn.dataset.view) return;
+            state.activeView = btn.dataset.view;
+            saveState();
+            render();
+          });
+        });
+
+        el.specialBuffToggle.addEventListener("click", () => {
+          state.specialBuff = !state.specialBuff;
+          saveState();
+          render();
+        });
+
+        el.specialBuffBtn.addEventListener("click", () => {
+          state.specialBuff = !state.specialBuff;
+          saveState();
+          render();
+        });
+
+        [el.allianceHours, el.allianceMinutes, el.allianceSeconds].forEach((input) => {
+          input.addEventListener("input", () => {
+            state.allianceTimeHours = Number(el.allianceHours.value || 0);
+            state.allianceTimeMinutes = Number(el.allianceMinutes.value || 0);
+            state.allianceTimeSeconds = Number(el.allianceSeconds.value || 0);
+            saveState();
+            render();
+          });
+        });
+      }
+
+      function render() {
+        state.selectedLevel ||= 8;
+        state.troopTier ||= 10;
+        state.activeView ||= "alliance";
+        state.language ||= "zh";
+        applyLanguage();
+        renderHeroes();
+        renderResourceSettings();
+        renderResourceLevels();
+        renderResourceTypes();
+        renderSummary();
+        renderAllianceResourceTypes();
+        renderTroopLevels();
+        renderAllianceSummary();
+        el.allianceHours.value = state.allianceTimeHours;
+        el.allianceMinutes.value = state.allianceTimeMinutes;
+        el.allianceSeconds.value = state.allianceTimeSeconds;
+        renderTabs();
+      }
+
+      bindControls();
+      render();
+    </script>
+  </body>
+</html>
