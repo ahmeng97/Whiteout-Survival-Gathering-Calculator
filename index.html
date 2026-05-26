@@ -4,6 +4,13 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>无尽冬日采集计算器</title>
+    <meta property="og:image" content="https://gom-s3-user-avatar.s3.us-west-2.amazonaws.com/wp-content/uploads/2023/07/new-icon.png">
+		<meta property="og:image:secure_url" content="https://gom-s3-user-avatar.s3.us-west-2.amazonaws.com/wp-content/uploads/2023/07/new-icon.png">
+		<meta property="og:image:width" content="512">
+		<meta property="og:image:height" content="512">
+    <link rel="icon" href="https://gom-s3-user-avatar.s3.us-west-2.amazonaws.com/wp-content/uploads/2023/07/cropped-new-icon-32x32.png" sizes="32x32"><link rel="icon" href="https://gom-s3-user-avatar.s3.us-west-2.amazonaws.com/wp-content/uploads/2023/07/cropped-new-icon-192x192.png" sizes="192x192">
+<link rel="apple-touch-icon" href="https://gom-s3-user-avatar.s3.us-west-2.amazonaws.com/wp-content/uploads/2023/07/cropped-new-icon-180x180.png">
+<meta name="msapplication-TileImage" content="https://gom-s3-user-avatar.s3.us-west-2.amazonaws.com/wp-content/uploads/2023/07/cropped-new-icon-270x270.png">
     <style>
       :root {
         --bg-0: #202f9a;
@@ -1236,7 +1243,7 @@
             const key = input.id.replace("bonus-", "");
             state.resourceBonuses[key] = Number(input.value || 0);
             saveState();
-            render();
+            refreshCalculatedOutputs();
           });
         });
       }
@@ -1450,6 +1457,12 @@
         el.allianceBonusBreakdown.textContent = `${t("allianceLabelTotal")}: +${formatNumber(totalBonus, 1)}% · ${t("weightFactor")}: x${result.weightFactor} · ${t("troopLevel")}: T${state.troopTier}`;
       }
 
+      function refreshCalculatedOutputs() {
+        renderSummary();
+        renderAllianceSummary();
+        renderLoadTable();
+      }
+
       function bindControls() {
         el.langToggle.addEventListener("click", () => {
           state.language = currentLang() === "en" ? "zh" : "en";
@@ -1499,11 +1512,9 @@
         renderResourceSettings();
         renderResourceLevels();
         renderResourceTypes();
-        renderSummary();
+        refreshCalculatedOutputs();
         renderAllianceResourceTypes();
         renderTroopLevels();
-        renderAllianceSummary();
-        renderLoadTable();
         el.allianceHours.value = state.allianceTimeHours;
         el.allianceMinutes.value = state.allianceTimeMinutes;
         el.allianceSeconds.value = state.allianceTimeSeconds;
