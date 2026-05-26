@@ -514,6 +514,11 @@
         font-weight: 900;
       }
 
+      .load-grid {
+        display: grid;
+        gap: 12px;
+      }
+
       .footer-space {
         height: 12px;
       }
@@ -596,7 +601,7 @@
       <div class="tabs" role="tablist" aria-label="资源页面切换">
         <button class="tab-btn active" type="button" data-view="resource" id="tabResource">资源采集</button>
         <button class="tab-btn" type="button" data-view="alliance" id="tabAlliance">联盟采集</button>
-        <button class="tab-btn" type="button" disabled title="后续继续做" id="tabLoad">负重查询</button>
+        <button class="tab-btn" type="button" data-view="load" id="tabLoad">负重查询</button>
       </div>
 
       <div class="status-bar" id="buffBanner">+100% Buff 已启用</div>
@@ -739,6 +744,25 @@
         </section>
       </section>
 
+      <section class="view" id="loadView">
+        <section class="panel">
+          <h2 id="loadTitle">T1 - T10 负重量与资源量</h2>
+          <div class="hint" id="loadHint" style="margin: 0 0 12px;">按 1:1 / 5:1 / 20:1 直接换算木材/肉类、煤矿、铁矿可采数量。</div>
+          <table class="detail-table">
+            <thead>
+              <tr>
+                <th id="loadColTier">兵力等级</th>
+                <th id="loadColCap">负重量</th>
+                <th id="loadColMeat">木材 / 肉类</th>
+                <th id="loadColCoal">煤矿</th>
+                <th id="loadColIron">铁矿</th>
+              </tr>
+            </thead>
+            <tbody id="loadBody"></tbody>
+          </table>
+        </section>
+      </section>
+
       <div class="footer-space"></div>
     </main>
 
@@ -817,6 +841,13 @@
           allianceTimeHint: "默认 12 小时，按剩余时间反推这段时间内能采到多少资源。",
           troopTitle: "选择兵力等级",
           allianceCalcTitle: "联盟资源采集计算",
+          loadTitle: "T1 - T10 负重量与资源量",
+          loadHint: "按 1:1 / 5:1 / 20:1 直接换算木材/肉类、煤矿、铁矿可采数量。",
+          loadColTier: "兵力等级",
+          loadColCap: "负重量",
+          loadColMeat: "木材 / 肉类",
+          loadColCoal: "煤矿",
+          loadColIron: "铁矿",
           hourUnit: "小时",
           minuteUnit: "分钟",
           secondUnit: "秒",
@@ -862,6 +893,13 @@
           allianceTimeHint: "Default is 12 hours. We estimate how much can be gathered during the remaining time.",
           troopTitle: "Choose Troop Tier",
           allianceCalcTitle: "Alliance Gathering Calculator",
+          loadTitle: "T1 - T10 Load and Resource Capacity",
+          loadHint: "Directly convert meat/wood, coal, and iron capacity using the 1:1 / 5:1 / 20:1 ratios.",
+          loadColTier: "Troop Tier",
+          loadColCap: "Load",
+          loadColMeat: "Meat / Wood",
+          loadColCoal: "Coal",
+          loadColIron: "Iron",
           hourUnit: "h",
           minuteUnit: "m",
           secondUnit: "s",
@@ -944,6 +982,15 @@
         tableTitle: document.getElementById("tableTitle"),
         resourceView: document.getElementById("resourceView"),
         allianceView: document.getElementById("allianceView"),
+        loadView: document.getElementById("loadView"),
+        loadTitle: document.getElementById("loadTitle"),
+        loadHint: document.getElementById("loadHint"),
+        loadColTier: document.getElementById("loadColTier"),
+        loadColCap: document.getElementById("loadColCap"),
+        loadColMeat: document.getElementById("loadColMeat"),
+        loadColCoal: document.getElementById("loadColCoal"),
+        loadColIron: document.getElementById("loadColIron"),
+        loadBody: document.getElementById("loadBody"),
         allianceResourceTypeTitle: document.getElementById("allianceResourceTypeTitle"),
         allianceTimeTitle: document.getElementById("allianceTimeTitle"),
         allianceTimeHint: document.getElementById("allianceTimeHint"),
@@ -987,7 +1034,7 @@
             allianceTimeMinutes: Number.isFinite(parsed.allianceTimeMinutes) ? parsed.allianceTimeMinutes : 0,
             allianceTimeSeconds: Number.isFinite(parsed.allianceTimeSeconds) ? parsed.allianceTimeSeconds : 0,
             troopTier: Number.isFinite(parsed.troopTier) ? parsed.troopTier : 10,
-            activeView: parsed.activeView || "alliance",
+            activeView: parsed.activeView || "load",
             language: parsed.language === "en" ? "en" : "zh",
           };
         } catch {
@@ -1001,7 +1048,7 @@
             allianceTimeMinutes: 0,
             allianceTimeSeconds: 0,
             troopTier: 10,
-            activeView: "alliance",
+            activeView: "load",
             language: "zh",
           };
         }
@@ -1044,6 +1091,12 @@
       function formatSpeed(value) {
         const decimals = Math.abs(value) >= 100000 ? 1 : 2;
         return `${formatNumber(value, decimals)}/h`;
+      }
+
+      function formatCapacity(value) {
+        return new Intl.NumberFormat(currentLang() === "en" ? "en-US" : "zh-CN", {
+          maximumFractionDigits: 2,
+        }).format(value);
       }
 
       function formatDuration(hours) {
@@ -1257,6 +1310,7 @@
         });
         el.resourceView.classList.toggle("active", state.activeView === "resource");
         el.allianceView.classList.toggle("active", state.activeView === "alliance");
+        el.loadView.classList.toggle("active", state.activeView === "load");
       }
 
       function applyLanguage() {
@@ -1271,7 +1325,7 @@
         el.tabResource.textContent = t("tabResource");
         el.tabAlliance.textContent = t("tabAlliance");
         el.tabLoad.textContent = t("tabLoad");
-        el.tabLoad.title = currentLang() === "en" ? "Coming soon" : "后续继续做";
+        el.tabLoad.title = "";
         el.resourceLevelTitle.textContent = t("resourceLevelTitle");
         el.resourceTypeTitle.textContent = t("resourceTypeTitle");
         el.resourceCalcTitle.textContent = t("resourceCalcTitle");
@@ -1280,6 +1334,13 @@
         el.allianceTimeHint.textContent = t("allianceTimeHint");
         el.troopTitle.textContent = t("troopTitle");
         el.allianceCalcTitle.textContent = t("allianceCalcTitle");
+        el.loadTitle.textContent = t("loadTitle");
+        el.loadHint.textContent = t("loadHint");
+        el.loadColTier.textContent = t("loadColTier");
+        el.loadColCap.textContent = t("loadColCap");
+        el.loadColMeat.textContent = t("loadColMeat");
+        el.loadColCoal.textContent = t("loadColCoal");
+        el.loadColIron.textContent = t("loadColIron");
         document.querySelectorAll(".time-unit").forEach((node, index) => {
           node.textContent = [t("hourUnit"), t("minuteUnit"), t("secondUnit")][index] || node.textContent;
         });
@@ -1298,6 +1359,24 @@
         document.querySelectorAll("#allianceView .summary-card .metric-label").forEach((node, index) => {
           node.textContent = [t("loadCol"), t("troopsCol")][index] || node.textContent;
         });
+      }
+
+      function renderLoadTable() {
+        loadBody.innerHTML = TROOP_LOADS.map((load, index) => {
+          const tier = index + 1;
+          const meatWood = load / 1;
+          const coal = load / 5;
+          const iron = load / 20;
+          return `
+            <tr class="${tier === state.troopTier ? "active" : ""}">
+              <td>T${tier}</td>
+              <td>${formatCapacity(load)}</td>
+              <td>${formatCapacity(meatWood)}</td>
+              <td>${formatCapacity(coal)}</td>
+              <td>${formatCapacity(iron)}</td>
+            </tr>
+          `;
+        }).join("");
       }
 
       function renderSummary() {
@@ -1413,7 +1492,7 @@
       function render() {
         state.selectedLevel ||= 8;
         state.troopTier ||= 10;
-        state.activeView ||= "alliance";
+        state.activeView ||= "load";
         state.language ||= "zh";
         applyLanguage();
         renderHeroes();
@@ -1424,6 +1503,7 @@
         renderAllianceResourceTypes();
         renderTroopLevels();
         renderAllianceSummary();
+        renderLoadTable();
         el.allianceHours.value = state.allianceTimeHours;
         el.allianceMinutes.value = state.allianceTimeMinutes;
         el.allianceSeconds.value = state.allianceTimeSeconds;
